@@ -18,14 +18,17 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/mIwr/AesIge</PackageProjectUrl>
     <Version>$(AssemblyVersion)</Version>
+    <AnalysisLevel>6.0</AnalysisLevel>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <WarningLevel>7</WarningLevel>
+    <FileAlignment>1024</FileAlignment>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <WarningLevel>7</WarningLevel>
+    <FileAlignment>1024</FileAlignment>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,6 +1,8 @@
 ﻿
 # AES IGE (Infinite Garble Extension)
 
+[![](http://img.shields.io/nuget/v/AesIge.svg)](http://www.nuget.org/packages/AesIge)
+
 ## General 
 
 Infinite Garble Extension (IGE) is a block cipher mode. It has the property that errors are propagated forward indefinitely. 

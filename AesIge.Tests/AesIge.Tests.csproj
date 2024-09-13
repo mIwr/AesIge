@@ -10,6 +10,8 @@
     <IsPublishable>False</IsPublishable>
 
     <RootNamespace>System.Security.Cryptography</RootNamespace>
+
+    <BaseOutputPath>../build/$(MSBuildProjectName)</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>

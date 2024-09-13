@@ -40,6 +40,9 @@
             set { _aesEng.Key = value; }
         }
 
+        /// <summary>
+        /// Initializes AES IGE engine with random IV
+        /// </summary>
         public AesIge()
         {
             _aesEng = Aes.Create();

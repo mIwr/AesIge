@@ -8,6 +8,10 @@ on:
       - "**/*.cs"
       - "**/*.csproj"
 
+concurency:
+  group: proj-${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
 
   nuget_publish:

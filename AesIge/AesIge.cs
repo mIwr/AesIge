@@ -48,8 +48,10 @@
             _aesEng = Aes.Create();
             _aesEng.Mode = CipherMode.ECB;
             _aesEng.Padding = PaddingMode.None;
-            _aesEng.KeySize = 256;            
-            _iv = RandomNumberGenerator.GetBytes(32);
+            _aesEng.KeySize = 256;
+            var rnd = RandomNumberGenerator.Create();
+            _iv = new byte[32];
+            rnd.GetBytes(_iv);
         }
 
         /// <summary>

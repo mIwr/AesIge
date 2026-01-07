@@ -1,4 +1,4 @@
-name: Publish to nuget and release
+name: Publish to nuget
 
 on:
   push:
@@ -21,10 +21,12 @@ jobs:
       release_ver: ${{ steps.proj_version.outputs.assembly-version }}
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-dotnet@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '6.x'
+          dotnet-version: |
+            6.0.x
+            8.0.x
           
       - name: Launch unit tests
         run: dotnet test --nologo
@@ -69,19 +71,3 @@ jobs:
 
           # Flag to toggle pushing symbols along with nuget package to the server, disabled by default
           INCLUDE_SYMBOLS: false
-          
-  release:
-    name: Make Github release
-    needs: nuget_publish
-    runs-on: ubuntu-latest
-
-    steps:     
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_BUILD_TOKEN }}
-          RELEASE_VERSION: ${{ needs.nuget_publish.outputs.release_ver }}
-        with:
-          tag_name: ${{ env.RELEASE_VERSION }}
-          release_name: ${{ github.event.repository.name }} ${{ env.RELEASE_VERSION }}
-          draft: true

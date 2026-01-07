@@ -1,0 +1,103 @@
+name: Release with NuGet package build
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "**/*.cs"
+      - "**/*.csproj"
+
+jobs:
+
+  unit_tests:
+    name: Unit tests 
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '6.x'
+
+      - name: Launch tests
+        run: dotnet test --nologo
+  
+  build_nuget:
+    name: Build NuGet package
+    needs: unit_tests
+    runs-on: ubuntu-latest
+    env:
+      BUILD_DIR: ./build/AesIge/Release
+    outputs:
+      release_ver: ${{ steps.proj_version.outputs.assembly-version }}
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+        
+      - name: Parse csproj version
+        id: proj_version
+        uses: kzrnm/get-net-sdk-project-versions-action@v1
+        with:
+          proj-path: AesIge/AesIge.csproj
+      
+      - name: Release build
+        run: dotnet build AesIge/AesIge.csproj -c Release
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: nuget_artifact
+          path: ${{ env.BUILD_DIR }}/AesIge.${{ steps.proj_version.outputs.assembly-version }}.nupkg
+          
+  github_release_draft:
+    name: Make Github release draft
+    needs:
+      - unit_tests
+      - build_nuget
+    env:
+      GITHUB_TOKEN: ${{ secrets.RELEASE_BUILD_TOKEN }}
+      RELEASE_VERSION: ${{ needs.build_nuget.outputs.release_ver }}
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          release_name: ${{ github.event.repository.name }} ${{ env.RELEASE_VERSION }}
+          draft: true
+
+  github_upload_nuget_artifact:
+    name: Upload NuGet build artifact to Github release
+    needs:
+      - github_release_draft
+      - unit_tests
+      - build_nuget
+    env:
+      GITHUB_TOKEN: ${{ secrets.RELEASE_BUILD_TOKEN }}
+      RELEASE_VERSION: ${{ needs.build_nuget.outputs.release_ver }}
+      UPLOAD_URL: ${{ needs.github_release_draft.outputs.upload_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download nuget artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: nuget_artifact
+
+      - name: Upload nuget artifact to release assets
+        uses: actions/upload-release-asset@v1.0.1
+        with:
+          upload_url: ${{ env.UPLOAD_URL }}
+          asset_path: ${{ github.event.repository.name }}.${{ env.RELEASE_VERSION }}.nupkg
+          asset_name: ${{ github.event.repository.name }}.${{ env.RELEASE_VERSION }}.nupkg
+          asset_content_type: application/zip
